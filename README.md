@@ -77,7 +77,7 @@ You can install Postman via this website: https://www.postman.com/downloads/
     -   [x] Commit: `Implement receive function in Notification controller.`
     -   [x] Commit: `Implement list_messages function in Notification service.`
     -   [x] Commit: `Implement list function in Notification controller.`
-    -   [ ] Write answers of your learning module's "Reflection Subscriber-2" questions in this README.
+    -   [x] Write answers of your learning module's "Reflection Subscriber-2" questions in this README.
 
 ## Your Reflections
 This is the place for you to write reflections:
@@ -95,3 +95,15 @@ RwLock<> diperlukan karena operasi pada daftar Notifications didominasi oleh ope
 Di Java, static variable bisa diubah kapan saja melalui static method karena Java menggunakan garbage collector yang mengelola memori secara otomatis dan menjamin keamanan akses memori di runtime. Rust sebaliknya mengandalkan sistem ownership dan borrow checker yang bekerja di compile time, sehingga mutasi pada static variable yang bisa diakses oleh banyak thread sekaligus berpotensi menyebabkan data race yang tidak bisa dideteksi oleh compiler secara statis. Oleh karena itu, Rust melarang mutable static variable secara default dan mengharuskan penggunaan mekanisme sinkronisasi seperti Mutex<> atau RwLock<> yang menjamin keamanan akses secara eksplisit. Pendekatan ini sesuai dengan filosofi Rust yaitu mencegah bug concurrency sejak tahap kompilasi, bukan membiarkannya muncul sebagai error di runtime.
 
 #### Reflection Subscriber-2
+
+> 1. Have you explored things outside of the steps in the tutorial, for example: `src/lib.rs`? If not, explain why you did not do so. If yes, explain things that you have learned from those other parts of code. 
+
+Setelah mengeksplorasi src/lib.rs, terlihat bahwa file ini berfungsi sebagai fondasi konfigurasi global seluruh aplikasi receiver. Di sini didefinisikan dua static variable menggunakan lazy_static: REQWEST_CLIENT sebagai HTTP client yang dipakai ulang di seluruh aplikasi, dan APP_CONFIG yang menyimpan konfigurasi seperti URL instance dan nama aplikasi. Pendekatan ini menerapkan Singleton pattern, memastikan hanya ada satu instance HTTP client dan konfigurasi yang dipakai bersama oleh semua bagian aplikasi tanpa perlu diinisialisasi ulang. Selain itu, file ini juga mendefinisikan type alias Result dan Error serta fungsi compose_error_response yang menstandardisasi format error response di seluruh aplikasi, sehingga setiap endpoint mengembalikan format error yang konsisten.
+
+> 2. Since you have completed the tutorial by now and have tried to test your notification system by spawning multiple instances of Receiver, explain how Observer pattern eases you to plug in more subscribers. How about spawning more than one instance of Main app, will it still be easy enough to add to the system? 
+
+Observer pattern memudahkan penambahan Subscriber baru karena Publisher (BambangShop) tidak perlu diubah sama sekali ketika ada Subscriber baru yang mendaftar. Subscriber cukup mengirimkan request subscribe ke Publisher dengan menyertakan URL-nya, dan Publisher akan otomatis menyertakan Subscriber tersebut dalam daftar penerima notifikasi berikutnya. Hal ini sesuai dengan Open-Closed Principle, di mana sistem terbuka untuk penambahan Subscriber baru tanpa memodifikasi kode Publisher. Namun jika ada lebih dari satu instance Main app, masing-masing instance memiliki daftar Subscriber-nya sendiri yang tersimpan di memori, sehingga Subscriber yang mendaftar ke satu instance tidak otomatis terdaftar di instance lainnya. Untuk mengatasi hal ini diperlukan mekanisme shared state antar instance, misalnya dengan menyimpan daftar Subscriber di database eksternal atau menggunakan message broker seperti Redis.
+
+> 3. Have you tried to make your own Tests, or enhance documentation on your **Postman collection**? If you have tried those features, tell us whether it is useful for your work (it can be your tutorial work or your Group Project).
+
+Pada tutorial ini, saya belum mencoba membuat test script sendiri maupun memperkaya dokumentasi di Postman Collection, karena fokus utama masih pada menyelesaikan langkah-langkah tutorial itu sendiri. Di luar tutorial, saya pernah mencoba membuat test sederhana untuk memverifikasi response dari endpoint yang saya buat sendiri, dan fitur tersebut cukup membantu untuk mengecek apakah output sudah sesuai ekspektasi tanpa harus memeriksa secara manual setiap kali. Ke depannya, fitur automated test di Postman terlihat cukup relevan untuk dimanfaatkan lebih jauh, terutama dalam konteks Group Project di mana konsistensi response antar endpoint perlu dijaga bersama tim.
