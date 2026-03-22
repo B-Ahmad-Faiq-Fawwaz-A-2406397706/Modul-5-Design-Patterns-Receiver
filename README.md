@@ -66,8 +66,8 @@ You can install Postman via this website: https://www.postman.com/downloads/
     -   [x] Commit: `Create Notification database and Notification repository struct skeleton.`
     -   [x] Commit: `Implement add function in Notification repository.`
     -   [x] Commit: `Implement list_all_as_string function in Notification repository.`
-    -   [ ] Write answers of your learning module's "Reflection Subscriber-1" questions in this README.
--   **STAGE 3: Implement services and controllers**
+    -   [x] Write answers of your learning module's "Reflection Subscriber-1" questions in this README.
+-   **STAGE 2: Implement services and controllers**
     -   [ ] Commit: `Create Notification service struct skeleton.`
     -   [ ] Commit: `Implement subscribe function in Notification service.`
     -   [ ] Commit: `Implement subscribe function in Notification controller.`
@@ -85,5 +85,13 @@ This is the place for you to write reflections:
 ### Mandatory (Subscriber) Reflections
 
 #### Reflection Subscriber-1
+
+> 1. In this tutorial, we used `RwLock<>` to synchronise the use of `Vec` of `Notifications`. Explain why it is necessary for this case, and explain why we do not use `Mutex<>` instead? 
+
+RwLock<> diperlukan karena operasi pada daftar Notifications didominasi oleh operasi baca (misalnya menampilkan daftar notifikasi), bukan tulis. RwLock<> memungkinkan banyak thread membaca data secara bersamaan tanpa saling memblokir, sedangkan Mutex<> hanya mengizinkan satu thread mengakses data pada satu waktu, baik untuk baca maupun tulis. Jika menggunakan Mutex<>, setiap kali ada thread yang membaca daftar notifikasi, thread lain yang juga ingin membaca harus menunggu, padahal operasi baca tidak mengubah data dan seharusnya aman dilakukan secara paralel. Dengan RwLock<>, performa aplikasi menjadi lebih baik karena operasi baca yang dominan bisa berjalan secara concurrent.
+
+> 2. In this tutorial, we used `lazy_static` external library to define `Vec` and `DashMap` as a “`static`” variable. Compared to Java where we can mutate the content of a `static` variable via a `static` function, why did not Rust allow us to do so?
+
+Di Java, static variable bisa diubah kapan saja melalui static method karena Java menggunakan garbage collector yang mengelola memori secara otomatis dan menjamin keamanan akses memori di runtime. Rust sebaliknya mengandalkan sistem ownership dan borrow checker yang bekerja di compile time, sehingga mutasi pada static variable yang bisa diakses oleh banyak thread sekaligus berpotensi menyebabkan data race yang tidak bisa dideteksi oleh compiler secara statis. Oleh karena itu, Rust melarang mutable static variable secara default dan mengharuskan penggunaan mekanisme sinkronisasi seperti Mutex<> atau RwLock<> yang menjamin keamanan akses secara eksplisit. Pendekatan ini sesuai dengan filosofi Rust yaitu mencegah bug concurrency sejak tahap kompilasi, bukan membiarkannya muncul sebagai error di runtime.
 
 #### Reflection Subscriber-2
